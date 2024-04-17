@@ -1,8 +1,8 @@
 export type AppLoadType = 'loading' | 'sucseded' | 'failed'| 'idle'
 type InitStateType = typeof initState
 
-type setStatusACType=ReturnType<typeof setStatusAC>
-type setErrorusACType=ReturnType<typeof setErrorusAC>
+export type setStatusACType=ReturnType<typeof setStatusAC>
+export type setErrorusACType=ReturnType<typeof setappErrorusAC>
 const initState = {
     error: null as null | string,
     status: 'loading' as AppLoadType
@@ -24,5 +24,5 @@ export const appReduce = (state: InitStateType = initState, action: appActionsTy
 }
 
 export const setStatusAC=(status:AppLoadType)=>({type:'APP/Set-STATUS',status} as const)
-export const setErrorusAC=(error:null | string)=>({type:'APP/Set-ERROR',error} as const)
+export const setappErrorusAC=(error:null | string)=>({type:'APP/Set-ERROR',error} as const)
 export type appActionsType = setStatusACType | setErrorusACType

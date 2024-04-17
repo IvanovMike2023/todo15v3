@@ -2,8 +2,7 @@ import * as React from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import {useAppDispatch, useAppSelector} from "../../app/store";
-import {setErrorusAC} from "../../app/app-reduce";
-import {SnackbarOrigin} from "@mui/material/Snackbar/Snackbar";
+import {setappErrorusAC} from "../../app/app-reduce";
 
 export const CustomizedSnackbars = () => {
     //const [open, setOpen] = React.useState(false);
@@ -13,7 +12,7 @@ export const CustomizedSnackbars = () => {
         if (reason === 'clickaway') {
             return;
         }
-        dispatch(setErrorusAC(null))
+        dispatch(setappErrorusAC(null))
 
     };
     return (

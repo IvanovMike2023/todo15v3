@@ -1,8 +1,14 @@
-import {AddTodolistActionType, RemoveTodolistActionType, SetTodolistsActionType} from './todolists-reducer'
+import {
+    AddTodolistActionType,
+    RemoveTodolistActionType,
+    setEntityStatusAC,
+    SetTodolistsActionType
+} from './todolists-reducer'
 import {TaskPriorities, TaskStatuses, TaskType, todolistsAPI, UpdateTaskModelType} from '../../api/todolists-api'
 import {Dispatch} from 'redux'
 import {AppRootStateType} from '../../app/store'
-import {appActionsType, setErrorusAC, setStatusAC} from "../../app/app-reduce";
+import {appActionsType, setappErrorusAC, setStatusAC} from "../../app/app-reduce";
+import {handleServerAppError} from "../../utils/error-utils";
 
 const initialState: TasksStateType = {}
 
@@ -85,12 +91,13 @@ export const addTaskTC = (title: string, todolistId: string) => (dispatch: Dispa
                 dispatch(action)
                 dispatch(setStatusAC('sucseded'))
             } else {
-                if (res.data.messages.length) {
-                    dispatch(setErrorusAC(res.data.messages[0]))
-                } else dispatch(setErrorusAC('server not messages'))
+                handleServerAppError<{item:TaskType}>(dispatch,res.data)
             }
             dispatch(setStatusAC('failed'))
-        })
+        }).catch((e)=>{
+        dispatch(setappErrorusAC(e.message))
+        dispatch(setStatusAC('sucseded'))
+    })
 }
 export const updateTaskTC = (taskId: string, domainModel: UpdateDomainTaskModelType, todolistId: string) =>
     (dispatch: Dispatch<ActionsType>, getState: () => AppRootStateType) => {
@@ -111,18 +118,14 @@ export const updateTaskTC = (taskId: string, domainModel: UpdateDomainTaskModelT
             status: task.status,
             ...domainModel
         }
-
         todolistsAPI.updateTask(todolistId, taskId, apiModel)
             .then(res => {
                 if (res.data.resultCode === RESULT_CODE.SUCCSEEDED) {
                     const action = updateTaskAC(taskId, domainModel, todolistId)
                     dispatch(action)
                 } else {
-                    if (res.data.messages.length) {
-                        dispatch(setErrorusAC(res.data.messages[0]))
-                    } else dispatch(setErrorusAC('server not messages'))
+                    handleServerAppError<{item:TaskType}>(dispatch,res.data)
                 }
-                dispatch(setStatusAC('failed'))
             })
     }
 
