@@ -15,11 +15,11 @@ import { Menu } from '@mui/icons-material';
 import LinearProgress from '@mui/material/LinearProgress';
 import {useAppSelector} from "./store";
 import {AppLoadType} from "./app-reduce";
+import {CustomizedSnackbars} from "../components/errorSnackbar/erroSnackbar";
 
 
 function App() {
 const status = useAppSelector<AppLoadType>((state)=>state.load.status)
-    console.log(status)
     return (
         <div className="App">
             <AppBar position="static">
@@ -34,9 +34,8 @@ const status = useAppSelector<AppLoadType>((state)=>state.load.status)
                 </Toolbar>
             </AppBar>
             { (status==='loading') && <LinearProgress color="secondary" />}
-
+            <CustomizedSnackbars/>
             <Container fixed>
-
                 <TodolistsList/>
             </Container>
         </div>

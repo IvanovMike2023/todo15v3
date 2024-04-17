@@ -2,7 +2,7 @@ import {AddTodolistActionType, RemoveTodolistActionType, SetTodolistsActionType}
 import {TaskPriorities, TaskStatuses, TaskType, todolistsAPI, UpdateTaskModelType} from '../../api/todolists-api'
 import {Dispatch} from 'redux'
 import {AppRootStateType} from '../../app/store'
-import {appActionsType, setStatusAC} from "../../app/app-reduce";
+import {appActionsType, setErrorusAC, setStatusAC} from "../../app/app-reduce";
 
 const initialState: TasksStateType = {}
 
@@ -49,6 +49,12 @@ export const setTasksAC = (tasks: Array<TaskType>, todolistId: string) =>
     ({type: 'SET-TASKS', tasks, todolistId} as const)
 
 // thunks
+enum RESULT_CODE {
+    SUCCSEEDED = 0,
+    FAILED,
+    RECAPTCHA_FAILED = 2
+}
+
 export const fetchTasksTC = (todolistId: string) => (dispatch: Dispatch<ActionsType>) => {
     dispatch(setStatusAC('loading'))
     todolistsAPI.getTasks(todolistId)
@@ -72,10 +78,18 @@ export const addTaskTC = (title: string, todolistId: string) => (dispatch: Dispa
     dispatch(setStatusAC('loading'))
     todolistsAPI.createTask(todolistId, title)
         .then(res => {
-            const task = res.data.data.item
-            const action = addTaskAC(task)
-            dispatch(action)
-            dispatch(setStatusAC('sucseded'))
+            //console.log(res)
+            if (res.data.resultCode === RESULT_CODE.SUCCSEEDED) {
+                const task = res.data.data.item
+                const action = addTaskAC(task)
+                dispatch(action)
+                dispatch(setStatusAC('sucseded'))
+            } else {
+                if (res.data.messages.length) {
+                    dispatch(setErrorusAC(res.data.messages[0]))
+                } else dispatch(setErrorusAC('server not messages'))
+            }
+            dispatch(setStatusAC('failed'))
         })
 }
 export const updateTaskTC = (taskId: string, domainModel: UpdateDomainTaskModelType, todolistId: string) =>
@@ -100,8 +114,15 @@ export const updateTaskTC = (taskId: string, domainModel: UpdateDomainTaskModelT
 
         todolistsAPI.updateTask(todolistId, taskId, apiModel)
             .then(res => {
-                const action = updateTaskAC(taskId, domainModel, todolistId)
-                dispatch(action)
+                if (res.data.resultCode === RESULT_CODE.SUCCSEEDED) {
+                    const action = updateTaskAC(taskId, domainModel, todolistId)
+                    dispatch(action)
+                } else {
+                    if (res.data.messages.length) {
+                        dispatch(setErrorusAC(res.data.messages[0]))
+                    } else dispatch(setErrorusAC('server not messages'))
+                }
+                dispatch(setStatusAC('failed'))
             })
     }
 
