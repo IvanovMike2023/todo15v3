@@ -1,7 +1,7 @@
 import {todolistsAPI, TodolistType} from '../../api/todolists-api'
 import {Dispatch} from 'redux'
 import {appActionsType, AppLoadType, setappErrorusAC, setStatusAC} from "../../app/app-reduce";
-import {handleServerNetworkError} from "../../utils/error-utils";
+import {handleServerAppError, handleServerNetworkError} from "../../utils/error-utils";
 
 const initialState: Array<TodolistDomainType> = []
 
@@ -45,6 +45,12 @@ export const setEntityStatusAC = (todoId: string, entityStatus: AppLoadType) => 
 } as const)
 
 // thunks
+enum RESULT_CODE {
+    SUCCSEEDED = 0,
+    FAILED,
+    RECAPTCHA_FAILED = 2
+}
+
 export const fetchTodolistsTC = () => {
     return (dispatch: Dispatch<ActionsType>) => {
         todolistsAPI.getTodolists()
@@ -89,6 +95,7 @@ export const changeTodolistTitleTC = (id: string, title: string) => {
         dispatch(setStatusAC('loading'))
         todolistsAPI.updateTodolist(id, title)
             .then((res) => {
+
                 dispatch(changeTodolistTitleAC(id, title))
                 dispatch(setStatusAC('sucseded'))
             }).catch((e)=>{

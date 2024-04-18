@@ -75,9 +75,16 @@ export const removeTaskTC = (taskId: string, todolistId: string) => (dispatch: D
     dispatch(setStatusAC('loading'))
     todolistsAPI.deleteTask(todolistId, taskId)
         .then(res => {
-            const action = removeTaskAC(taskId, todolistId)
-            dispatch(action)
-            dispatch(setStatusAC('sucseded'))
+            console.log(res.data)
+            if (res.data.resultCode === RESULT_CODE.SUCCSEEDED) {
+                const action = removeTaskAC(taskId, todolistId)
+                dispatch(action)
+                dispatch(setStatusAC('sucseded'))
+            }else {
+                handleServerAppError(dispatch,res.data)
+            }
+            dispatch(setStatusAC('failed'))
+
         })
 }
 export const addTaskTC = (title: string, todolistId: string) => (dispatch: Dispatch<ActionsType>) => {
